@@ -46,6 +46,18 @@ npm test
 
 See [Testing](docs/TESTING.md) for local setup and browser checks.
 
+## Assumptions
+
+- Single-tenant workspace: each account only manages its own projects. Shared teams, invitations, and per-project collaborators are out of scope.
+- No email delivery is configured, so password reset and email verification are not implemented; registration logs the user in directly.
+- Dates are plain calendar dates (`YYYY-MM-DD`) with no timezone conversion, since projects are tracked by day, not by time.
+- Page size is fixed at 25 projects per page; the dataset size for a small agency doesn't warrant a configurable page size.
+- No file attachments, activity/audit history, or notifications, since the brief centers on core project CRUD and tracking.
+- PostgreSQL is the only supported database; no abstraction for swapping database engines was added.
+- Demo/seed data (`DemoSeeder`) is for local and Docker demo use only and is refused outside `local`/`testing` environments.
+
+See [Architecture](docs/ARCHITECTURE.md#deliberate-scope) for the full rationale behind these decisions.
+
 ## Documentation
 
 - [Setup](docs/SETUP.md)
