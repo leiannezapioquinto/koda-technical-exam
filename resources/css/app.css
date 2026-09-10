@@ -1,0 +1,4 @@
+:root { font-family: 'Segoe UI', system-ui, sans-serif; color: #25283b; background: #f7f8fc; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.base { max-width: 1100px; margin: 80px auto; padding: 32px; }

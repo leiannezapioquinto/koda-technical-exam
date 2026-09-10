@@ -28,3 +28,10 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+/.runtime/
+/.env.testing
+/test-results/
+/playwright-report/
+/coverage/
+
