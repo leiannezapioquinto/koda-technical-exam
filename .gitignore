@@ -35,3 +35,7 @@ auth.json
 /playwright-report/
 /coverage/
 
+
+.env.docker
+.env.testing
+/.phpunit.cache/

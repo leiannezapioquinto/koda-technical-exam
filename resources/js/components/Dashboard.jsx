@@ -1,17 +1,7 @@
-import { useEffect, useState } from 'react';
-import { LayoutDashboard, FolderKanban, LogOut, Layers3, Timer, CircleCheck, Pause, ChevronRight } from 'lucide-react';
-import { api } from '../api';
-export default function Dashboard({ user, onSignOut }) {
-    const [summary, setSummary] = useState(null);
-    const [error, setError] = useState('');
-    useEffect(() => { api('/dashboard/summary').then(setSummary).catch(error => setError(error.message)); }, []);
-    return <Workspace user={user} onSignOut={onSignOut}>
-        <div className="page-heading"><div><span className="eyebrow">YOUR WORKSPACE</span><h1>Project overview</h1><p className="muted">Keep your client work moving forward.</p></div></div>
-        {error && <div role="alert" className="alert">{error}</div>}
-        <SummaryCards summary={summary} />
-        <section className="panel empty-state"><FolderKanban size={40} /><h2>A fresh start for your projects</h2><p className="muted">Your client projects will appear here.</p></section>
-    </Workspace>;
-}
+import { useState } from 'react';
+import { LayoutDashboard, LogOut, Layers3, ChevronRight } from 'lucide-react';
+import ProjectList from './ProjectList';
+export default function Dashboard({ user, onSignOut }) { return <Workspace user={user} onSignOut={onSignOut}><ProjectList /></Workspace>; }
 export function Workspace({ user, onSignOut, children }) {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
@@ -24,9 +14,5 @@ export function Workspace({ user, onSignOut, children }) {
         <div className="workspace-main"><header className="topbar"><span className="breadcrumb">Workspace <ChevronRight size={14} /><strong>Overview</strong></span><div className="user-menu"><span className="avatar">{user.name.slice(0, 1).toUpperCase()}</span><span className="user-name">{user.name}</span><button className="icon-button" disabled={busy} title="Sign out" aria-label="Sign out" onClick={async () => { setBusy(true); try { await onSignOut(); } catch (error) { setError(error.message); } finally { setBusy(false); } }}><LogOut size={18} /></button></div></header>
         <main className="content">{error && <div className="alert" role="alert">{error}</div>}{children}</main><footer className="footer">Projexia <span>Clarity for every project.</span></footer></div>
     </div>;
-}
-export function SummaryCards({ summary }) {
-    const cards = [['Total projects', 'total', Layers3, 'purple'], ['In progress', 'in_progress', Timer, 'blue'], ['Completed', 'completed', CircleCheck, 'green'], ['On hold', 'on_hold', Pause, 'amber']];
-    return <section className="stats" aria-label="Project summary">{cards.map(([label, key, Icon, color]) => <div className="stat" key={key}><div><span>{label}</span><strong>{summary ? summary[key] : '—'}</strong></div><span className={'stat-icon ' + color}><Icon size={22} /></span></div>)}</section>;
 }
 

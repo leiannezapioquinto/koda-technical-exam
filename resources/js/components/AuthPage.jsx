@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, FolderKanban, ShieldCheck } from 'lucide-react';
 import { api, refreshCsrf } from '../api';
+import config from '../projectConfig';
 export default function AuthPage({ onAuthenticated }) {
     const [register, setRegister] = useState(window.location.pathname === '/register');
     const [errors, setErrors] = useState({});
@@ -31,14 +32,15 @@ export default function AuthPage({ onAuthenticated }) {
             {message && <div className="alert" role="alert">{message}</div>}
             {register && <AuthField label="Full name" name="name" autoComplete="name" errors={errors} />}
             <AuthField label="Email address" name="email" type="email" autoComplete="email" errors={errors} />
-            <AuthField label="Password" name="password" type="password" autoComplete={register ? 'new-password' : 'current-password'} errors={errors} minLength={register ? 12 : undefined} />
-            {register && <><small className="muted">At least 12 characters, including letters and numbers.</small><AuthField label="Confirm password" name="password_confirmation" type="password" autoComplete="new-password" errors={errors} /></>}
+            <AuthField label="Password" name="password" type="password" autoComplete={register ? 'new-password' : 'current-password'} errors={errors} minLength={register ? config.minPasswordLength : undefined} />
+            {register && <><small className="muted">At least {config.minPasswordLength} characters, including letters and numbers.</small><AuthField label="Confirm password" name="password_confirmation" type="password" autoComplete="new-password" errors={errors} /></>}
             <button className="button primary full" disabled={busy}>{busy ? 'Please wait…' : register ? 'Create account' : 'Sign in'}<ArrowRight size={18} /></button>
             <p className="auth-switch">{register ? 'Already have an account?' : 'New to Projexia?'} <button type="button" className="text-button" onClick={() => { setRegister(!register); setErrors({}); setMessage(''); }}>{register ? 'Sign in' : 'Create an account'}</button></p>
         </form></section>
     </main>;
 }
 function AuthField({ label, name, errors, ...props }) {
-    return <label className="field"><span>{label}</span><input name={name} required maxLength={255} aria-invalid={!!errors[name]} aria-describedby={errors[name] ? name + '-error' : undefined} {...props} />{errors[name] && <small id={name + '-error'} className="field-error">{errors[name][0]}</small>}</label>;
+    return <label className="field"><span>{label}</span><input name={name} required maxLength={config.nameMaxLength} aria-invalid={!!errors[name]} aria-describedby={errors[name] ? name + '-error' : undefined} {...props} />{errors[name] && <small id={name + '-error'} className="field-error">{errors[name][0]}</small>}</label>;
 }
+
 

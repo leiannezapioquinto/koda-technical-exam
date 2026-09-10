@@ -3,12 +3,39 @@
 namespace App\Services;
 
 use App\constants\ProjectConstants;
+use App\Models\Project;
 use App\Models\User;
 use App\Repositories\ProjectRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProjectService
 {
     public function __construct(private ProjectRepository $projects) {}
+
+    public function list(User $user, array $filters): LengthAwarePaginator
+    {
+        return $this->projects->paginate($user, $filters);
+    }
+
+    public function find(User $user, int $id): Project
+    {
+        return $this->projects->findOwned($user, $id);
+    }
+
+    public function create(User $user, array $attributes): Project
+    {
+        return $this->projects->create($user, $attributes);
+    }
+
+    public function update(User $user, int $id, array $attributes): Project
+    {
+        return $this->projects->update($this->find($user, $id), $attributes);
+    }
+
+    public function delete(User $user, int $id): void
+    {
+        $this->projects->delete($this->find($user, $id));
+    }
 
     public function summary(User $user): array
     {

@@ -10,5 +10,16 @@
     @viteReactRefresh
     @vite('resources/js/app.jsx')
 </head>
-<body><div id="app"></div></body>
+<body>
+    <div id="app"></div>
+    <script id="project-config" type="application/json">{!! json_encode([
+        'statuses' => \App\constants\ProjectConstants::STATUSES,
+        'priorities' => \App\constants\ProjectConstants::PRIORITIES,
+        'pageSize' => \App\constants\AppConstants::PAGE_SIZE,
+        'nameMaxLength' => \App\constants\AppConstants::NAME_MAX_LENGTH,
+        'descriptionMaxLength' => \App\constants\ProjectConstants::DESCRIPTION_MAX_LENGTH,
+        'searchMaxLength' => \App\constants\ProjectConstants::SEARCH_MAX_LENGTH,
+        'minPasswordLength' => \App\constants\AppConstants::MIN_PASSWORD_LENGTH,
+    ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
+</body>
 </html>
