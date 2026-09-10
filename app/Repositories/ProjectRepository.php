@@ -9,9 +9,15 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ProjectRepository
 {
+    /** Postgres SQLSTATE for a CHECK constraint violation. */
+    private const CHECK_VIOLATION = '23514';
+
     protected function ownedBy(User $user): Builder
     {
         return Project::query()->where('user_id', $user->id);
@@ -56,16 +62,42 @@ class ProjectRepository
     {
         $project = new Project($attributes);
         $project->user()->associate($user);
-        $project->save();
+
+        try {
+            DB::transaction(fn () => $project->save());
+        } catch (QueryException $e) {
+            $this->rethrowAsValidation($e);
+        }
 
         return $project;
     }
 
     public function update(Project $project, array $attributes): Project
     {
-        $project->update($attributes);
+        try {
+            DB::transaction(fn () => $project->update($attributes));
+        } catch (QueryException $e) {
+            $this->rethrowAsValidation($e);
+        }
 
         return $project->refresh();
+    }
+
+    /**
+     * The API already validates due_date >= start_date, so this only fires
+     * if that check is ever bypassed (e.g. a direct write). Translate the
+     * database's own guardrail into the same validation error the form
+     * request would have produced, instead of surfacing a raw DB error.
+     */
+    private function rethrowAsValidation(QueryException $e): never
+    {
+        if ($e->getCode() !== self::CHECK_VIOLATION || ! str_contains($e->getMessage(), 'projects_dates_check')) {
+            throw $e;
+        }
+
+        throw ValidationException::withMessages([
+            'due_date' => 'The due date cannot be earlier than the start date.',
+        ]);
     }
 
     public function delete(Project $project): void

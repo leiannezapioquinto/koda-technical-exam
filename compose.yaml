@@ -19,6 +19,7 @@ x-app-environment: &app-environment
   CACHE_STORE: database
   QUEUE_CONNECTION: sync
   LOG_CHANNEL: stderr
+  SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
 
 services:
   database:
@@ -44,7 +45,14 @@ services:
       context: .
       target: app
     environment: *app-environment
-    command: ["php", "artisan", "migrate", "--force", "--no-interaction"]
+    command:
+      - sh
+      - -c
+      - |
+        php artisan migrate --force --no-interaction
+        if [ "${SEED_DEMO_DATA:-false}" = "true" ]; then
+          php artisan db:seed --class=Database\\Seeders\\DemoSeeder --env=local --force --no-interaction
+        fi
     depends_on:
       database:
         condition: service_healthy

@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Repositories\ProjectRepository;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -198,6 +200,29 @@ class ProjectApiTest extends TestCase
             ['status=Unknown', 'status'], ['priority=Urgent', 'priority'],
             ['page=0', 'page'], ['page=abc', 'page'], ['search[]=x', 'search'],
         ];
+    }
+
+    public function test_unexpected_exception_returns_generic_error_and_is_logged(): void
+    {
+        Log::spy();
+        $this->app->bind(ProjectRepository::class, fn () => new class extends ProjectRepository
+        {
+            public function findOwned($user, $id): Project
+            {
+                throw new \RuntimeException('Database connection lost');
+            }
+        });
+        $project = Project::factory()->create();
+
+        $this->actingAs($project->user)->getJson('/projects/'.$project->id)
+            ->assertStatus(500)
+            ->assertExactJson(['message' => 'Something went wrong. Please try again later.']);
+
+        Log::shouldHaveReceived('error')->once()->withArgs(
+            fn (string $message, array $context) => $message === 'Database connection lost'
+                && $context['exception'] === \RuntimeException::class
+                && $context['user_id'] === $project->user->id,
+        );
     }
 
     public function test_summary_counts_only_the_current_users_projects(): void

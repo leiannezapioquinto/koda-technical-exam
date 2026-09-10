@@ -40,6 +40,8 @@ docker compose --env-file .env.docker ps
 
 Open http://localhost:8080 and register. To change the port, edit APP_PORT and APP_URL in `.env.docker`.
 
+To seed demo data (login `demo@projexia.test` / `ProjexiaDemo2026!` with sample projects) on the first run, set `SEED_DEMO_DATA=true` in `.env.docker` before starting the stack. It is safe to leave on across restarts — seeding is idempotent — but keep it `false` for real deployments.
+
 ## Public HTTPS deployment
 
 Point a reverse proxy with TLS at the app port, set APP_URL to the public HTTPS origin, and set SESSION_SECURE_COOKIE=true. Keep APP_ENV=production and APP_DEBUG=false. Restrict direct access to the backend port with your host firewall.
