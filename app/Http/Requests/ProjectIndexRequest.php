@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\constants\AppConstants;
 use App\constants\ProjectConstants;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ class ProjectIndexRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:'.ProjectConstants::SEARCH_MAX_LENGTH],
+            'client' => ['nullable', 'string', 'max:'.AppConstants::NAME_MAX_LENGTH],
             'status' => ['nullable', Rule::in(ProjectConstants::STATUSES)],
             'priority' => ['nullable', Rule::in(ProjectConstants::PRIORITIES)],
             'sort' => ['nullable', Rule::in(ProjectConstants::SORT_FIELDS)],

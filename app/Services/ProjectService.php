@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Repositories\ProjectRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProjectService
 {
@@ -35,6 +36,14 @@ class ProjectService
     public function delete(User $user, int $id): void
     {
         $this->projects->delete($this->find($user, $id));
+    }
+
+    /**
+     * @return Collection<int, Project>
+     */
+    public function clients(User $user): Collection
+    {
+        return $this->projects->clientSummaries($user);
     }
 
     public function summary(User $user): array

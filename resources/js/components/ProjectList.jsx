@@ -50,7 +50,7 @@ export default function ProjectList() {
     }
     const filtered = !!(filters.search || filters.status || filters.priority);
     return <>
-        <div className="page-heading"><div><span className="eyebrow">YOUR WORKSPACE</span><h1>Project overview</h1><p className="muted">Keep your client work moving forward.</p></div><button className="button primary" onClick={() => setEditor({})}><Plus size={18} />New project</button></div>
+        <div className="page-heading"><div><span className="eyebrow">YOUR WORKSPACE</span><h1>Project overview</h1></div><button className="button primary" onClick={() => setEditor({})}><Plus size={18} />New project</button></div>
         <SummaryCards summary={summary} />
         <section className="panel project-panel" aria-label="Projects">
             <div className="panel-heading"><div><h2>All projects <span className="count">{result?.meta.total ?? '—'}</span></h2><p>Every project. One clear view.</p></div><span className="list-label"><FolderKanban size={16} />Project list</span></div>

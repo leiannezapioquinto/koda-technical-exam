@@ -4,6 +4,8 @@ namespace App\constants;
 
 final class ProjectConstants
 {
+    public const ID_PATTERN = '[1-9][0-9]{0,17}';
+
     public const STATUS_PLANNING = 'Planning';
 
     public const STATUS_IN_PROGRESS = 'In Progress';

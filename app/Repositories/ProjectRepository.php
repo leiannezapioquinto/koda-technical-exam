@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProjectRepository
 {
@@ -19,13 +20,16 @@ class ProjectRepository
     public function paginate(User $user, array $filters): LengthAwarePaginator
     {
         $query = $this->ownedBy($user);
-        if (! empty($filters['search'])) {
+        if (isset($filters['search']) && $filters['search'] !== '') {
             $search = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters['search']).'%';
             $query->where(function (Builder $query) use ($search): void {
                 $query->where('client_name', 'ilike', $search)
                     ->orWhere('project_name', 'ilike', $search)
                     ->orWhere('description', 'ilike', $search);
             });
+        }
+        if (isset($filters['client']) && $filters['client'] !== '') {
+            $query->where('client_name', $filters['client']);
         }
         foreach (['status', 'priority'] as $field) {
             if (! empty($filters[$field])) {
@@ -67,6 +71,21 @@ class ProjectRepository
     public function delete(Project $project): void
     {
         $project->delete();
+    }
+
+    /**
+     * Distinct clients for the user, each with its project count and most recent activity.
+     *
+     * @return Collection<int, Project>
+     */
+    public function clientSummaries(User $user): Collection
+    {
+        return $this->ownedBy($user)
+            ->selectRaw('client_name, COUNT(*) as project_count, MAX(updated_at) as last_activity_at')
+            ->groupBy('client_name')
+            ->orderByRaw('COUNT(*) DESC')
+            ->orderBy('client_name')
+            ->get();
     }
 
     public function statusCounts(User $user): array

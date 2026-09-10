@@ -23,9 +23,9 @@ export default function AuthPage({ onAuthenticated }) {
     }
     return <main className="auth-page">
         <section className="auth-story"><a className="brand" href="/"><img src="/logo.svg" alt="" />Projexia<span className="brand-dot">.</span></a>
-            <div><span className="eyebrow">A LITTLE CLARITY. A LOT OF PROGRESS.</span><h1>Great projects.<br />All in one place.</h1><p>A clear view of your client work, from the first idea to the final delivery.</p>
+            <div><span className="eyebrow">A LITTLE CLARITY. A LOT OF PROGRESS.</span><h1>Great projects.<br />All in one place.</h1>
                 <div className="auth-visual"><FolderKanban size={32} /><div><strong>Your next great project</strong><span>Planning → In progress → Completed</span></div><ShieldCheck size={24} /></div>
-            </div><span className="muted">Your work, beautifully organized.</span>
+            </div><span className="muted"></span>
         </section>
         <section className="auth-form-panel"><form onSubmit={submit} className="auth-form">
             <span className="eyebrow">WELCOME TO PROJEXIA</span><h2>{register ? 'Create your account' : 'Welcome back'}</h2><p className="muted">{register ? 'Make room for your next big idea.' : 'Sign in to your project workspace.'}</p>
