@@ -54,12 +54,7 @@ See [Testing](docs/TESTING.md) for local setup and browser checks.
 - [Docker deployment](docs/DEPLOYMENT.md)
 - [Testing](docs/TESTING.md)
 
-## Commit stages
+## AI tools disclosure
 
-1. Base Laravel + React/Vite project
-2. Authentication
-3. User dashboard
-4. Project functionality and Docker deployment
-5. Setup and technical documentation
-6. Test suites and verification fixes
+This project was built with the assistance of AI tools: **ChatGPT** and **Claude** (Claude Code).
 
