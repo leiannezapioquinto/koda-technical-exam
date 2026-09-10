@@ -1,0 +1,117 @@
+name: projexia
+
+x-app-environment: &app-environment
+  APP_NAME: Projexia
+  APP_ENV: ${APP_ENV:-production}
+  APP_KEY: ${APP_KEY:?Set APP_KEY in .env.docker}
+  APP_DEBUG: "false"
+  APP_URL: ${APP_URL:-http://localhost:8080}
+  DB_CONNECTION: pgsql
+  DB_HOST: database
+  DB_PORT: 5432
+  DB_DATABASE: ${DB_DATABASE:-projexia}
+  DB_USERNAME: ${DB_USERNAME:-projexia}
+  DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env.docker}
+  SESSION_DRIVER: database
+  SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+  SESSION_HTTP_ONLY: "true"
+  SESSION_SAME_SITE: lax
+  CACHE_STORE: database
+  QUEUE_CONNECTION: sync
+  LOG_CHANNEL: stderr
+  SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+
+services:
+  database:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-projexia}
+      POSTGRES_USER: ${DB_USERNAME:-projexia}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env.docker}
+    ports:
+      - "${DB_PORT_HOST:-55432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+
+  migrate:
+    image: projexia-app:local
+    build:
+      context: .
+      target: app
+    environment: *app-environment
+    command:
+      - sh
+      - -c
+      - |
+        php artisan migrate --force --no-interaction
+        if [ "${SEED_DEMO_DATA:-false}" = "true" ]; then
+          php artisan db:seed --class=Database\\Seeders\\DemoSeeder --env=local --force --no-interaction
+        fi
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    image: projexia-app:local
+    build:
+      context: .
+      target: app
+    environment: *app-environment
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/up') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  test-database:
+    profiles: ["test"]
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: projexia_test
+      POSTGRES_USER: projexia
+      POSTGRES_PASSWORD: test-only-password
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U projexia -d projexia_test"]
+      interval: 3s
+      timeout: 5s
+      retries: 15
+
+  test:
+    profiles: ["test"]
+    build:
+      context: .
+      target: test
+    environment:
+      APP_ENV: testing
+      APP_KEY: ${APP_KEY:?Set APP_KEY in .env.docker}
+      DB_CONNECTION: pgsql
+      DB_HOST: test-database
+      DB_PORT: 5432
+      DB_DATABASE: projexia_test
+      DB_USERNAME: projexia
+      DB_PASSWORD: test-only-password
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+    depends_on:
+      test-database:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+
