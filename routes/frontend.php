@@ -2,4 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/dashboard', 'app')->name('dashboard');
+Route::view('/dashboard', 'app')->middleware('auth')->name('dashboard');
